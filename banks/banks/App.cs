@@ -138,7 +138,7 @@ namespace banks
                 SpecialUrl = "http://data.sberbank.ru/moscow/ru/quotes/currencies/?base=beta",
                 Title = "Сбербанк",
                 Url = "http://sberbank.ru/ru/about/today/oib"
-            });       
+            });
         }
     }
 }

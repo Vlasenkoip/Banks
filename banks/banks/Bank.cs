@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
@@ -49,60 +50,48 @@ namespace banks
         {
             try
             {
-                var client = new HttpClient(new HttpClientHandler
-                {
-                    AllowAutoRedirect = false,
-                    UseCookies = true
-                });
+                var client = new HttpClient();
 
                 var response = await client.GetAsync(SpecialUrl ?? Url);
-                var buffer = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode) return null;
+
+                var buf = await response.Content.ReadAsByteArrayAsync();
+                var buffer = System.Text.Encoding.UTF8.GetString(buf, 0, buf.Length);
+
                 if (buffer == null) return null;
 
                 var regex = new Regex(Pattern);
                 var match = string.Empty;
 
-                if (Id == "sberbank")
-                {
-                    match = regex.Match(buffer).Groups[0].Value;
-                }
-                else
-                {
-                    match = regex.Match(buffer).Value;
+                match = regex.Match(buffer).Value;
 
-                    match = match
-                        .Replace(" ", string.Empty)
-                        .Replace(Environment.NewLine, string.Empty)
-                        .Replace("<tr>", string.Empty)
-                        .Replace("</tr>", string.Empty)
-                        .Replace("<td>", string.Empty)
-                        .Replace("</td>", string.Empty)
-                        .Replace("<b>", string.Empty)
-                        .Replace("</b>", string.Empty)
-                        .Replace("<", string.Empty)
-                        .Replace(">", string.Empty)
-                        .Replace("span", string.Empty)
-                        .Replace(";", string.Empty)
-                        //.Replace(".", ",")
-                        .Replace("\t", string.Empty)
-                        .Replace("strong", string.Empty)
-                        .Replace("USD_pok", string.Empty)
-                        .Replace("arRates['USD_RUR']=", string.Empty)
-                        .Replace("USD/class=\"col_02\"", string.Empty)
-                        .Replace("tdclass=\"name\"USD", string.Empty)
-                        .Replace("class=\"down\"", string.Empty)
-                        .Replace("tdclass=\"name\"USD", string.Empty)
-                        .Replace("5&nbsp;000&nbsp;USD)", string.Empty)
-                        .Replace(".w", string.Empty)
-                        .Replace("USD", string.Empty);
-                }
+                match = match
+                    .Replace(" ", string.Empty)
+                    .Replace(Environment.NewLine, string.Empty)
+                    .Replace("<tr>", string.Empty)
+                    .Replace("</tr>", string.Empty)
+                    .Replace("<td>", string.Empty)
+                    .Replace("</td>", string.Empty)
+                    .Replace("<b>", string.Empty)
+                    .Replace("</b>", string.Empty)
+                    .Replace("<", string.Empty)
+                    .Replace(">", string.Empty)
+                    .Replace("span", string.Empty)
+                    .Replace(";", string.Empty)
+                    .Replace("\t", string.Empty)
+                    .Replace("strong", string.Empty)
+                    .Replace("USD_pok", string.Empty)
+                    .Replace("arRates['USD_RUR']=", string.Empty)
+                    .Replace("USD/class=\"col_02\"", string.Empty)
+                    .Replace("tdclass=\"name\"USD", string.Empty)
+                    .Replace("class=\"down\"", string.Empty)
+                    .Replace("tdclass=\"name\"USD", string.Empty)
+                    .Replace("5&nbsp;000&nbsp;USD)", string.Empty)
+                    .Replace(".w", string.Empty)
+                    .Replace("USD", string.Empty);
 
-                if (Id == "sberbank")
-                {
-                    match = match.Substring(match.Length - 5, 5);
-                }
-
-                if (Id == "sdm" || Id == "psbank")
+                if (Id == "sdm" || Id == "psbank" || Id == "sberbank")
                 {
                     match = match.Substring(match.Length - 5, 5);
                 }
